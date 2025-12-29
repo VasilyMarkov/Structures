@@ -1,10 +1,14 @@
 #include <gtest/gtest.h>
 #include "list.hpp"
 
-struct Foo {
-    Foo(int val):val_(val) {};
+struct ObjectWithExceptions {
+    ObjectWithExceptions(int val):val_(val) {
+        if(cnt > 3) {
+            throw std::runtime_error("ObjectWithExceptions throw exception");
+        }
+    };
+    static size_t cnt = 0;
     int val_;
-    Foo() = delete;
 };
 
 TEST(list_iterator, ctor) {
@@ -70,6 +74,18 @@ TEST(list, range_based_for) {
     EXPECT_EQ(expected, actual);
 }
 
+TEST(list, iter_add) {
+    list<int> list = {1,2,3,4};
+    EXPECT_EQ(list.size(), 4);
+
+    auto begin = list.begin();
+    ++begin;
+    EXPECT_EQ(*begin, 2);
+    ++begin;
+    EXPECT_EQ(*begin, 3);
+    ++begin;
+    EXPECT_EQ(*begin, 4);
+}
 
 
 int main(int argc, char **argv) {

@@ -24,6 +24,24 @@ public:
     pointer operator->() { return std::addressof(asDerived().dereference()); }
 
     Derived& operator++() { asDerived().increment(); return asDerived(); }
+    Derived& operator--() { asDerived().decrement(); return asDerived(); }
+    Derived& operator+=(size_t n) {
+        advance(n);
+        return asDerived();
+    }
+
+    constexpr void advance(size_t n) {
+        auto dist = difference_type(n);
+        if constexpr(std:is_base_v<std::bidirectional_iterator_tag, iterator_category>) {
+            while(dist > 0) {
+                ++(*this);
+                --dist;
+            }
+        }
+        else if (std:is_base_v<std::forward_iterator_tag, iterator_category>) {
+
+        }
+    }
 
     friend bool operator==(const iterator_facade& lhs, const iterator_facade& rhs) {
         return lhs.asDerived().equal(rhs.asDerived());

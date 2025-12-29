@@ -26,6 +26,7 @@ public:
 		}
 	private:
 		Node* next_ = nullptr;
+		Node* prev_ = nullptr;
 		T val_;
 	};
 
@@ -34,22 +35,24 @@ public:
 	class list_iterator: public iterator_facade<
 									list_iterator, 
 									T, 
-									std::forward_iterator_tag
+									std::bidirectional_iterator_tag
 								> {
 		using BaseType =  iterator_facade<
 							list_iterator, 
 							T, 
-							std::forward_iterator_tag
+							std::bidirectional_iterator_tag
 						  >;
+		using reference = typename BaseType::reference;
 	public:
 		list_iterator(Node* node) noexcept :node_(node) {}
 
-		typename BaseType::reference dereference() noexcept { 
-			return node_->val_; 
-		}
+		reference dereference() noexcept { return node_->val_; }
 
 		void increment() noexcept { node_ = node_->next_; }
-
+		void decrement() noexcept { node_ = node_->prev_; }
+		void advance(size_t n) noexcept {
+			increment();
+		}
 		bool equal(const list_iterator& other) const {
 			return node_ == other.node_;
 		}
@@ -63,11 +66,19 @@ public:
 	
 	list(size_t n) { //TODO write list unwind for strong exception garantee
 		size_t idx{};
-		while(idx < n) {
-			push_back(T{}); //TODO check T by concept default_initializable
-			idx++;
+		try {
+			while(idx < n) {
+				push_back(T{}); //TODO check T by concept default_initializable
+				idx++;
+			}
+			size_ = n;
 		}
-		size_ = n;
+		catch(const std::exception& e) {
+			// while(idx != 0) {
+
+			// 	--idx;
+			// }	
+		}
 	}
 
 	//TODO write list unwind for strong exception garantee
@@ -88,10 +99,16 @@ public:
 			tail_ = head_;
 		}
 		else {
-			tail_->next_ = constructNode(val);
+			auto* node = constructNode(val);
+			node->prev_ = tail_;
+			tail_->next_ = node;
 			tail_ = tail_->next_;
 		}
 		++size_;
+	}
+
+	void pop_back() {
+		// destroyNode(tail_);
 	}
 
 	iterator begin() noexcept { return iterator(head_); }
