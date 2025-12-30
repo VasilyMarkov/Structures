@@ -42,17 +42,20 @@ public:
 							T, 
 							std::bidirectional_iterator_tag
 						  >;
-		using reference = typename BaseType::reference;
 	public:
+		using value_type = typename BaseType::value_type;
+		using reference = typename BaseType::reference;
+		using pointer = typename BaseType::pointer;
+		using iterator_category = typename BaseType::iterator_category;
+		using difference_type = typename BaseType::difference_type;
+		
 		list_iterator(Node* node) noexcept :node_(node) {}
 
 		reference dereference() noexcept { return node_->val_; }
 
 		void increment() noexcept { node_ = node_->next_; }
 		void decrement() noexcept { node_ = node_->prev_; }
-		void advance(size_t n) noexcept {
-			increment();
-		}
+
 		bool equal(const list_iterator& other) const {
 			return node_ == other.node_;
 		}
@@ -107,8 +110,19 @@ public:
 		++size_;
 	}
 
-	void pop_back() {
-		// destroyNode(tail_);
+	void pop_back() noexcept {
+		if(!head_) return;
+
+		if(size_ == 1) {
+			destroyNode(head_);
+			return;
+		}
+
+		auto* node = tail_;
+		tail_ = tail_->prev_;
+		tail_->next_ = nullptr;
+		destroyNode(node);
+		--size_;
 	}
 
 	iterator begin() noexcept { return iterator(head_); }

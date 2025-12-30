@@ -7,7 +7,7 @@ struct ObjectWithExceptions {
             throw std::runtime_error("ObjectWithExceptions throw exception");
         }
     };
-    static size_t cnt = 0;
+    inline static size_t cnt = 0;
     int val_;
 };
 
@@ -37,6 +37,18 @@ TEST(list, push_back) {
     EXPECT_NE(list.begin(), list.end());
 }
 
+TEST(list, pop_back) {
+    list<int> list = {1,2,3,4};
+    list.pop_back();
+
+    EXPECT_EQ(list.size(), 3);
+    for(auto el : list) {
+        std::cout << el << std::endl;
+    }
+    auto it = list.end() -= 2;
+    EXPECT_EQ(*it, 3);
+}
+
 TEST(list, ctor) {
     list<int> list(2);
     EXPECT_EQ(list.size(), 2);
@@ -49,7 +61,7 @@ TEST(list, ctor_init_list) {
     EXPECT_EQ(*list.begin(), 1);
 }
 
-TEST(list, iter_increment) {
+TEST(list, iter_increment_decrement) {
     list<int> list = {1,2,3,4};
     EXPECT_EQ(list.size(), 4);
 
@@ -60,6 +72,22 @@ TEST(list, iter_increment) {
     EXPECT_EQ(*begin, 3);
     ++begin;
     EXPECT_EQ(*begin, 4);
+    --begin;
+    EXPECT_EQ(*begin, 3);
+    --begin;
+    EXPECT_EQ(*begin, 2);
+}
+
+TEST(list, iter_add) {
+    list<int> list = {1,2,3,4};
+    EXPECT_EQ(list.size(), 4);
+    
+    auto it = list.begin() += 1;
+    EXPECT_EQ(*it, 2);
+    it += 2;
+    EXPECT_EQ(*it, 4);
+    it -= 1;
+    EXPECT_EQ(*it, 3);
 }
 
 TEST(list, range_based_for) {
@@ -74,19 +102,9 @@ TEST(list, range_based_for) {
     EXPECT_EQ(expected, actual);
 }
 
-TEST(list, iter_add) {
-    list<int> list = {1,2,3,4};
-    EXPECT_EQ(list.size(), 4);
-
-    auto begin = list.begin();
-    ++begin;
-    EXPECT_EQ(*begin, 2);
-    ++begin;
-    EXPECT_EQ(*begin, 3);
-    ++begin;
-    EXPECT_EQ(*begin, 4);
-}
-
+// TEST(list, strong_exception_garantee_ctor) {
+//     list<ObjectWithExceptions> list(4);
+// }
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
